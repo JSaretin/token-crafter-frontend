@@ -101,7 +101,7 @@
 			// result
 			await goto('manage-tokens/' + token.createdToken);
 		} catch (err) {
-			console.log(err);
+			errors = [String(err), ...errors];
 		}
 	}
 
