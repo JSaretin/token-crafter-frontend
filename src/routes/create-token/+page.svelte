@@ -63,6 +63,7 @@
 				errors = [err, ...errors];
 				return;
 			}
+			await connectWallet()
 		}
 		omegaFactory = new OmegaFather((omegaFactories as any)[network], $signer);
 
