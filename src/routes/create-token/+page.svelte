@@ -122,6 +122,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Create new token</title>
+</svelte:head>
+
 {#if errors}
 	<div class="fixed flex z-[100] flex-col text-sm gap-2 top-0 right-0 max-w-sm p-2">
 		{#each errors as error, index}
