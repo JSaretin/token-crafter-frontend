@@ -195,17 +195,19 @@
 				on:change={checkNetwork}
 				{required}
 			>
-				<option value={1}>Etheruem</option>
+				<!-- <option value={1}>Etheruem</option> -->
 				<option value={56}>Binance Smart Chain</option>
 				<option value={137}>Polygon</option>
-				<option value={100}>Gnosis</option>
-				<option value={314}>Filecoin</option>
-				<option value={2222}>Kava</option>
-				<option value={10}>Optimism</option>
-				<option value={43114}>Avalanche</option>
-				<option value={42161}>Arbitrum One</option>
-				<option value={25}>Cronos</option>
-				<option value={1284}>Moonbeam</option>
+				<option value={-1}>Solana</option>
+				<option value={-2}>TON</option>
+				<!-- <option value={100}>Gnosis</option> -->
+				<!-- <option value={314}>Filecoin</option> -->
+				<!-- <option value={2222}>Kava</option> -->
+				<!-- <option value={10}>Optimism</option> -->
+				<!-- <option value={43114}>Avalanche</option> -->
+				<!-- <option value={42161}>Arbitrum One</option> -->
+				<!-- <option value={25}>Cronos</option> -->
+				<!-- <option value={1284}>Moonbeam</option> -->
 			</select>
 		</label>
 
