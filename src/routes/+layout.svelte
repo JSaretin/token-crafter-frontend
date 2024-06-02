@@ -46,7 +46,7 @@
 		<div
 			class="max-w-sm w-full p-4 rounded-2xl shadow-sm shadow-orange-200 flex flex-col gap-4 text-lg"
 		>
-			<p class="text-red-600 font-medium">
+			<p class="text-orange-600 font-medium">
 				To create a new token, you need to have MetaMask installed or copy the link below and open
 				it in your offline wallet (TrustWallet, MetaMask (mobile) or any other wallet with DAPP
 				support) DAPP browser to continue.
