@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Socials from '$lib/componets/Socials.svelte';
 	import '../app.css';
 	import { ethers } from 'ethers';
 	import { setContext } from 'svelte';
@@ -60,9 +61,7 @@
 				{/if}
 			</div>
 
-			<div class="flex justify-center">
-				<a href="http://x.com/_TokenCrafter" target="_blank" rel="noopener noreferrer" class="text-4xl font-bold">X</a>
-			</div>
+			<Socials/>
 		</div>
 	</div>
 {:else}
