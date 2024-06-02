@@ -9,6 +9,7 @@
 
 	import { OmegaFather } from '$lib/omegaFatherGateway';
 	import { omegaFactories } from '$lib/contractAddresses';
+	import Socials from '$lib/componets/Socials.svelte';
 
 	let omegaFactory: OmegaFather;
 
@@ -180,8 +181,8 @@
 	</div>
 {/if}
 
-<div class="flex">
-	<form class="px-4 flex-1 flex flex-col mx-auto max-w-md" on:submit|preventDefault={createToken}>
+<div class="flex flex-col w-full">
+	<form class="px-4 w-full flex-1 flex flex-col mx-auto max-w-md" on:submit|preventDefault={createToken}>
 		<FormStringInput {required} placeholder="Bitcoin" title="Name" bind:value={name} />
 		<FormStringInput {required} placeholder="BTC" title="Symbol" bind:value={symbol} />
 		<FormNumberInput
@@ -242,4 +243,8 @@
 			>
 		{/if}
 	</form>
+
+	<div class="my-6">
+		<Socials />
+	</div>
 </div>
