@@ -15,7 +15,7 @@ interface ContractInfo {
 
 export class OmegaFather {
     contract: Contract
-    constructor(contractAddr: string, provider: ethers.Signer) {
+    constructor(contractAddr: string, provider: ethers.Signer|ethers.Provider) {
         this.contract = new Contract(contractAddr, OmegaFatherABI, provider);
     }
 

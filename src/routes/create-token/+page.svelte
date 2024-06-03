@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ethers } from 'ethers';
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import type { Writable } from 'svelte/store';
 	import { goto } from '$app/navigation';
 	import FormStringInput from '$lib/componets/FormStringInput.svelte';
@@ -35,6 +35,7 @@
 	let unsupported = false;
 
 	let errors: string[] = [];
+	let creating = false
 
 	async function switchNetwork(chainId: number) {
 		try {
@@ -59,6 +60,10 @@
 			transferTax = 0;
 		}
 
+		creating = true
+
+		await connectUserWallet()
+
 		const userNetwork = (await $signer.provider?.getNetwork())?.chainId as bigint;
 		if (ethers.toNumber(userNetwork) !== network) {
 			try {
@@ -71,23 +76,23 @@
 		}
 		omegaFactory = new OmegaFather((omegaFactories as any)[network], $signer);
 
-		const rawBalance = await $signer.provider!.getBalance($signer.getAddress());
-		const [mainFee, partFee] = await omegaFactory.getCreationFee();
+		const rawBalance = Number(ethers.formatEther(await $signer.provider!.getBalance($signer.getAddress())));
 
-		if (!isPartner && rawBalance < mainFee) {
+		if (!isPartner && rawBalance < fees[network].non_partner) {
 			// alert the user
 			errors = [
-				`Your balance is too low to create a new token. You need to have at least ${ethers.formatEther(mainFee)} ${(await $signer.provider!.getNetwork()).name}`,
+				`Your balance is too low to create a new token. You need to have at least ${fees[network].non_partner} ${coins[network]}`,
 				...errors
 			];
 			return;
 		}
 
-		if (isPartner && rawBalance < partFee) {
+		if (isPartner && rawBalance < fees[network].partner) {
 			errors = [
-				`Your balance is too low to create a new token. You need to have at least ${ethers.formatEther(partFee)} ${(await $signer.provider!.getNetwork()).name}`,
+				`Your balance is too low to create a new token. You need to have at least ${fees[network].partner} ${coins[network]}`,
 				...errors
 			];
+			creating = false
 			return;
 		}
 
@@ -106,6 +111,7 @@
 			// result
 			await goto('manage-tokens/' + token.createdToken);
 		} catch (err) {
+			creating= false
 			errors = [String(err), ...errors];
 		}
 	}
@@ -130,7 +136,54 @@
 	let sellTaxError = false;
 	let transferTaxError = false;
 
-	$: isInvelidForm = hasTax && (buyTaxError || sellTaxError || transferTaxError)
+	$: isInvelidForm = hasTax && (buyTaxError || sellTaxError || transferTaxError);
+
+	let showConfirmation = false;
+	let fee = 0;
+
+	const rpc = {
+		137: 'https://polygon-mainnet.infura.io/v3/ca62ea2529ea4d0a8ab47ae53ae84082',
+		56: 'https://bsc-dataseed1.binance.org/'
+	};
+
+	let fees: {
+		[chain: number]: {
+			non_partner: number;
+			partner: number;
+		};
+	} = {};
+
+	let coins: { [chain: number]: string } = {};
+
+	async function loadFees() {
+		await Promise.all(
+			Object.keys(omegaFactories).map(async (key) => {
+				try {
+					const pro = new ethers.JsonRpcProvider((rpc as any)[key]);
+					const net = await pro.getNetwork();
+					coins[key as any] = net.name.toUpperCase();
+					const [withoutPartner, part] = await new OmegaFather(
+						(omegaFactories as any)[key],
+						pro
+					).getCreationFee();
+					fees[key as any] = {
+						non_partner: Number(ethers.formatEther(withoutPartner)),
+						partner: Number(ethers.formatEther(part))
+					};
+				} catch (e) {
+					errors = ['Unable to estimate creation fee', ...errors];
+				}
+			})
+		);
+	}
+
+	onMount(async () => {
+		await loadFees();
+	});
+
+	async function showConfirmationPopUp() {
+		showConfirmation = true;
+	}
 </script>
 
 <svelte:head>
@@ -190,12 +243,78 @@
 	</div>
 {/if}
 
-<div class="flex flex-col w-full max-w-lg">
+{#if showConfirmation}
+	<div
+		class="fixed inset-0 flex justify-center align-middle place-items-center bg-neutral-800 bg-opacity-80 backdrop-blur-sm p-2"
+	>
+		<div class="max-w-lg w-full flex flex-col bg-neutral-300 rounded-md">
+			<div class="w-full flex justify-center p-4 border-b-2 border-neutral-400">
+				<h2 class="text-2xl uppercase">Token Preview</h2>
+			</div>
+			<div class="flex flex-col p-4 [&_span]:text-neutral-500">
+				<div class="flex justify-between">
+					Name: <span>{name}</span>
+				</div>
+				<div class="flex justify-between">
+					Symbol: <span>{symbol}</span>
+				</div>
+				<div class="flex justify-between">
+					Total Supply: <span>{Number(totalSupply).toLocaleString()}</span>
+				</div>
+				<div class="flex justify-between">
+					Decimals: <span>{decimals}</span>
+				</div>
+				<div class="flex justify-between">
+					Is Parterner: <span>{isPartner ? 'Yes' : 'No'}</span>
+				</div>
+
+				{#if hasTax}
+					<div class="flex justify-between whitespace-nowrap">
+						Tax Wallet: <span class="truncate">{taxWallet}</span>
+					</div>
+					<div class="flex justify-between">
+						Buy Tax: <span>{buyTax || 0}%</span>
+					</div>
+					<div class="flex justify-between">
+						Sell Tax: <span>{sellTax || 0}%</span>
+					</div>
+					<div class="flex justify-between">
+						Transfer Tax: <span>{transferTax || 0}%</span>
+					</div>
+				{/if}
+				<div class="flex justify-between">
+					Deployment Fee: <span>{isPartner? fees[network].partner : fees[network].non_partner} {coins[network]}</span>
+				</div>
+			</div>
+
+			<div class="flex gap-4 mt-10 pt-3 border-t-2 p-4 border-neutral-400 text-white">
+				<button
+					class="flex-1 p-4 bg-yellow-500 rounded-md"
+					on:click={() => {
+						showConfirmation = false;
+					}}>Edit</button
+				>
+				<button class="flex-1 p-4 bg-green-500 overflow-hidden rounded-md relative" disabled={creating} on:click={createToken}>
+					{#if creating}
+						<div class="bg-green-500 absolute inset-0 flex justify-center align-middle place-items-center">
+							Creating...
+						</div>
+					{/if}
+					Create</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<div class="flex flex-col w-full">
 	<div class="w-full flex justify-between">
 		<a href="/" class="text-blue-600">Back</a>
 		<a href="/manage-tokens" class="text-green-600">Manage Tokens</a>
 	</div>
-	<form class="w-full mt-6 flex-1 flex flex-col mx-auto" on:submit|preventDefault={createToken}>
+	<form
+		class="w-full mt-6 flex-1 flex flex-col mx-auto"
+		on:submit|preventDefault={showConfirmationPopUp}
+	>
 		<FormStringInput {required} placeholder="Bitcoin" title="Name" bind:value={name} />
 		<FormStringInput {required} placeholder="BTC" title="Symbol" bind:value={symbol} />
 		<FormNumberInput
@@ -235,7 +354,7 @@
 			</select>
 		</label>
 
-		<FormCheckbox title="Add Tax" bind:checked={hasTax}/>
+		<FormCheckbox title="Add Tax" bind:checked={hasTax} />
 		{#if hasTax}
 			<FormStringInput
 				{required}
@@ -244,11 +363,16 @@
 				bind:value={taxWallet}
 			/>
 			<FormNumberInput placeholder="10%" title="Buy Tax" bind:value={buyTax} />
-			<CheckTax bind:tax={buyTax} bind:isPartner bind:error={buyTaxError}/>
+			<CheckTax bind:tax={buyTax} bind:isPartner bind:error={buyTaxError} />
 			<FormNumberInput placeholder="8%" title="Sell Tax" bind:value={sellTax} />
-			<CheckTax bind:tax={sellTax} bind:isPartner bind:error={sellTaxError}/>
+			<CheckTax bind:tax={sellTax} bind:isPartner bind:error={sellTaxError} />
 			<FormNumberInput placeholder="2%" title="Transfer Tax" bind:value={transferTax} />
-			<CheckTax bind:tax={transferTax} bind:isPartner isTransfer={true} bind:error={transferTaxError}/>
+			<CheckTax
+				bind:tax={transferTax}
+				bind:isPartner
+				isTransfer={true}
+				bind:error={transferTaxError}
+			/>
 		{/if}
 		<FormCheckbox title="Enable Partnership" bind:checked={isPartner} />
 		{#if isPartner}
@@ -272,7 +396,14 @@
 			</div>
 		{/if}
 
-		{#if $signer === undefined}
+		<button
+			disabled={isInvelidForm}
+			type="submit"
+			class="w-full disabled:cursor-not-allowed p-4 rounded-md bg-green-400 mt-6 text-white"
+			>Create Token</button
+		>
+
+		<!-- {#if $signer === undefined}
 			<button
 				type="button"
 				class="w-full p-4 rounded-md bg-orange-400 mt-6 text-white"
@@ -282,7 +413,7 @@
 			<button disabled={isInvelidForm} type="submit" class="w-full disabled:cursor-not-allowed p-4 rounded-md bg-green-400 mt-6 text-white"
 				>Create Token</button
 			>
-		{/if}
+		{/if} -->
 	</form>
 
 	<div class="my-10">
