@@ -5,7 +5,6 @@
 
 	const signer = getContext('signer') as Writable<ethers.Signer>;
 	const connectWallet = getContext('connectWallet') as () => Promise<void>;
-
 </script>
 
 {#if $signer === undefined}
@@ -18,5 +17,9 @@
 		>
 	</div>
 {:else}
+	<div class="w-full flex justify-between mb-6">
+		<a href="/" class="text-blue-600">Back</a>
+		<a href="/create-token" class="text-yellow-400">Create Token</a>
+	</div>
 	<slot />
 {/if}

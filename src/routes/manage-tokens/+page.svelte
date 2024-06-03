@@ -25,12 +25,11 @@
 	}
 </script>
 
-
 <svelte:head>
 	<title>Manage created tokens</title>
 </svelte:head>
 
-<div class="flex flex-col px-4 max-w-lg mx-auto">
+<div class="flex flex-col max-w-lg mx-auto">
 	<h1 class="flex justify-between">Created Contracts <span>{totalCreatedContracts}</span></h1>
 	<div class="flex flex-col gap-4 mt-6">
 		{#each createdContracts as contract (contract.addr)}

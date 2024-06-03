@@ -13,6 +13,8 @@
 
 	let omegaFactory: OmegaFather;
 
+	const siteLink = getContext('siteLink');
+
 	const signer = getContext('signer') as Writable<ethers.Signer>;
 	const connectWallet = getContext('connectWallet') as () => Promise<void>;
 
@@ -64,7 +66,7 @@
 				errors = [err, ...errors];
 				return;
 			}
-			await connectWallet()
+			await connectWallet();
 		}
 		omegaFactory = new OmegaFather((omegaFactories as any)[network], $signer);
 
@@ -181,8 +183,12 @@
 	</div>
 {/if}
 
-<div class="flex flex-col w-full">
-	<form class="px-4 w-full flex-1 flex flex-col mx-auto max-w-md" on:submit|preventDefault={createToken}>
+<div class="flex flex-col w-full max-w-lg">
+	<div class="w-full flex justify-between">
+		<a href="/" class="text-blue-600">Back</a>
+		<a href="/manage-tokens" class="text-green-600">Manage Tokens</a>
+	</div>
+	<form class="w-full mt-6 flex-1 flex flex-col mx-auto" on:submit|preventDefault={createToken}>
 		<FormStringInput {required} placeholder="Bitcoin" title="Name" bind:value={name} />
 		<FormStringInput {required} placeholder="BTC" title="Symbol" bind:value={symbol} />
 		<FormNumberInput
@@ -191,7 +197,12 @@
 			title="Total Supply"
 			bind:value={totalSupply}
 		/>
-		<FormNumberInput {required} placeholder="18" title="Decimals" bind:value={decimals} />
+		<FormNumberInput
+			{required}
+			placeholder="18"
+			title="Decimals (Recommended 18)"
+			bind:value={decimals}
+		/>
 
 		<label class="flex flex-col gap-4 py-2">
 			Select Network
@@ -230,6 +241,26 @@
 			<FormNumberInput placeholder="2%" title="Transfer Tax" bind:value={transferTax} />
 		{/if}
 		<FormCheckbox title="Enable Partnership" bind:checked={isPartner} />
+		{#if isPartner}
+			<div
+				class="mt-4 text-sm text-yellow-700 italic bg-yellow-600 bg-opacity-40 p-4 rounded-2xl border border-yellow-600"
+			>
+				<p>
+					Enabling partnership allows you to deploy your new token with 30% less than the required
+					amount for deployment. <span class="underline"
+						>By allowing this feature, you agree for Token Crafter to remove 0.05% fee from this
+						token trade(s).</span
+					>
+					We will also share the token with our community to boost it exposure and investor base.
+					<a
+						href={`${siteLink}#faqs`}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="text-blue-600 font-bold">Click here</a
+					> to learn more about partnership
+				</p>
+			</div>
+		{/if}
 
 		{#if $signer === undefined}
 			<button
@@ -244,7 +275,7 @@
 		{/if}
 	</form>
 
-	<div class="my-6">
+	<div class="my-10">
 		<Socials />
 	</div>
 </div>

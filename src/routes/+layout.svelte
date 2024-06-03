@@ -35,12 +35,14 @@
 	function resetCopied() {
 		copied = false;
 	}
+	const siteLink = 'https://tokencrafter.online';
 
 	setContext('signer', signer);
 	setContext('connectWallet', connectWallet);
+	setContext('siteLink', siteLink);
 </script>
 
-<h1 class="text-2xl text-center my-6">TokenCrafter</h1>
+<a href={siteLink}><h1 class="text-2xl text-center my-6">TokenCrafter</h1></a>
 
 {#if showMetamaskError}
 	<div class="fixed inset-0 bg-bg z-50 flex justify-center align-middle place-items-center">
@@ -70,7 +72,11 @@
 				support) DAPP browser to continue.
 			</p>
 			<div class="mt-6 rounded-2xl w-full bg-white overflow-hidden flex">
-				<input type="text" value={link} class="py-4 pl-4 text-neutral-500 font-bold flex-1 font-mono" />
+				<input
+					type="text"
+					value={link}
+					class="py-4 pl-4 text-neutral-500 font-bold flex-1 font-mono"
+				/>
 				{#if !copied}
 					<button class="px-4 bg-blue-500 text-white" on:click={copyLink}>Copy</button>
 				{:else}
@@ -82,14 +88,13 @@
 				{/if}
 			</div>
 			<div class="mt-6">
-			<Socials />
-
+				<Socials />
 			</div>
 		</div>
 	</div>
 {/if}
 
-<div class="max-w-lg w-full mx-auto text-neutral-600">
+<div class="max-w-lg p-4 w-full mx-auto text-neutral-600">
 	<slot></slot>
 </div>
 
