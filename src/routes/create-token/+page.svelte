@@ -10,6 +10,7 @@
 	import { OmegaFather } from '$lib/omegaFatherGateway';
 	import { omegaFactories } from '$lib/contractAddresses';
 	import Socials from '$lib/componets/Socials.svelte';
+	import CheckTax from '$lib/componets/CheckTax.svelte';
 
 	let omegaFactory: OmegaFather;
 
@@ -124,6 +125,12 @@
 		}
 		unsupported = false;
 	}
+
+	let buyTaxError = false;
+	let sellTaxError = false;
+	let transferTaxError = false;
+
+	$: isInvelidForm = hasTax && (buyTaxError || sellTaxError || transferTaxError)
 </script>
 
 <svelte:head>
@@ -228,7 +235,7 @@
 			</select>
 		</label>
 
-		<FormCheckbox title="Add Tax" bind:checked={hasTax} />
+		<FormCheckbox title="Add Tax" bind:checked={hasTax}/>
 		{#if hasTax}
 			<FormStringInput
 				{required}
@@ -237,8 +244,11 @@
 				bind:value={taxWallet}
 			/>
 			<FormNumberInput placeholder="10%" title="Buy Tax" bind:value={buyTax} />
+			<CheckTax bind:tax={buyTax} bind:isPartner bind:error={buyTaxError}/>
 			<FormNumberInput placeholder="8%" title="Sell Tax" bind:value={sellTax} />
+			<CheckTax bind:tax={sellTax} bind:isPartner bind:error={sellTaxError}/>
 			<FormNumberInput placeholder="2%" title="Transfer Tax" bind:value={transferTax} />
+			<CheckTax bind:tax={transferTax} bind:isPartner isTransfer={true} bind:error={transferTaxError}/>
 		{/if}
 		<FormCheckbox title="Enable Partnership" bind:checked={isPartner} />
 		{#if isPartner}
@@ -269,7 +279,7 @@
 				on:click={connectUserWallet}>Connect Wallet</button
 			>
 		{:else}
-			<button type="submit" class="w-full p-4 rounded-md bg-green-400 mt-6 text-white"
+			<button disabled={isInvelidForm} type="submit" class="w-full disabled:cursor-not-allowed p-4 rounded-md bg-green-400 mt-6 text-white"
 				>Create Token</button
 			>
 		{/if}
