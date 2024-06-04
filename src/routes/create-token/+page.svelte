@@ -35,7 +35,7 @@
 	let unsupported = false;
 
 	let errors: string[] = [];
-	let creating = false
+	let creating = false;
 
 	async function switchNetwork(chainId: number) {
 		try {
@@ -60,9 +60,9 @@
 			transferTax = 0;
 		}
 
-		creating = true
+		creating = true;
 
-		await connectUserWallet()
+		await connectUserWallet();
 
 		const userNetwork = (await $signer.provider?.getNetwork())?.chainId as bigint;
 		if (ethers.toNumber(userNetwork) !== network) {
@@ -76,7 +76,9 @@
 		}
 		omegaFactory = new OmegaFather((omegaFactories as any)[network], $signer);
 
-		const rawBalance = Number(ethers.formatEther(await $signer.provider!.getBalance($signer.getAddress())));
+		const rawBalance = Number(
+			ethers.formatEther(await $signer.provider!.getBalance($signer.getAddress()))
+		);
 
 		if (!isPartner && rawBalance < fees[network].non_partner) {
 			// alert the user
@@ -92,7 +94,7 @@
 				`Your balance is too low to create a new token. You need to have at least ${fees[network].partner} ${coins[network]}`,
 				...errors
 			];
-			creating = false
+			creating = false;
 			return;
 		}
 
@@ -109,9 +111,9 @@
 				isPartner
 			);
 			// result
-			await goto('manage-tokens/' + token.createdToken);
+			await goto('/manage-tokens');
 		} catch (err) {
-			creating= false
+			creating = false;
 			errors = [String(err), ...errors];
 		}
 	}
@@ -283,7 +285,9 @@
 					</div>
 				{/if}
 				<div class="flex justify-between">
-					Deployment Fee: <span>{isPartner? fees[network].partner : fees[network].non_partner} {coins[network]}</span>
+					Deployment Fee: <span
+						>{isPartner ? fees[network].partner : fees[network].non_partner} {coins[network]}</span
+					>
 				</div>
 			</div>
 
@@ -294,13 +298,20 @@
 						showConfirmation = false;
 					}}>Edit</button
 				>
-				<button class="flex-1 p-4 bg-green-500 overflow-hidden rounded-md relative" disabled={creating} on:click={createToken}>
+				<button
+					class="flex-1 p-4 bg-green-500 overflow-hidden rounded-md relative"
+					disabled={creating}
+					on:click={createToken}
+				>
 					{#if creating}
-						<div class="bg-green-500 absolute inset-0 flex justify-center align-middle place-items-center">
+						<div
+							class="bg-green-500 absolute inset-0 flex justify-center align-middle place-items-center"
+						>
 							Creating...
 						</div>
 					{/if}
-					Create</button>
+					Create</button
+				>
 			</div>
 		</div>
 	</div>

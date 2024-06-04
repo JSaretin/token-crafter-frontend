@@ -15,7 +15,7 @@ interface ContractInfo {
 
 export class OmegaFather {
     contract: Contract
-    constructor(contractAddr: string, provider: ethers.Signer|ethers.Provider) {
+    constructor(contractAddr: string, provider: ethers.Signer | ethers.Provider) {
         this.contract = new Contract(contractAddr, OmegaFatherABI, provider);
     }
 
@@ -72,7 +72,7 @@ export class OmegaFather {
 
 
     async createToken(taxWallet: string, decimals: number, buyTax: number, sellTax: number, transferTax: number,
-        totalSupply: number, name: string, symbol: string, isPartner: boolean): Promise<{createdToken: string}> {
+        totalSupply: number, name: string, symbol: string, isPartner: boolean): Promise<any> {
         const fees = await this.getCreationFee();
         let fee: number;
         if (isPartner) fee = fees[1]
@@ -102,26 +102,26 @@ export class OmegaFather {
         const tx = await this.contract.withdrawCoin(receiver, amount);
         // call a function before confirmation
         const sentTransaction = await tx.wait();
-        // call a function after confirmation 
+        // call a function after confirmation
     }
 
     async withrawAllCoin(receiver: string) {
         const tx = await this.contract.withrawAllCoin(receiver);
         // call a function before confirmation
         const sentTransaction = await tx.wait();
-        // call a function after confirmation 
+        // call a function after confirmation
     }
 
     async withdrawToken(tokenAddress: string, receiver: string, amount: number) {
         const tx = await this.contract.withdrawToken(tokenAddress, receiver, amount);
         // call a function before confirmation
         const sentTransaction = await tx.wait();
-        // call a function after confirmation 
+        // call a function after confirmation
     }
     async withdrawAllToken(tokenAddress: string, receiver: string) {
         const tx = await this.contract.withdrawAllToken(tokenAddress, receiver);
         // call a function before confirmation
         const sentTransaction = await tx.wait();
-        // call a function after confirmation 
+        // call a function after confirmation
     }
 }
